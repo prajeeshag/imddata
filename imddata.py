@@ -43,7 +43,7 @@ def lon_temp():
     )
 
 
-def eyear_parser(value: str | int) -> int:
+def end_year(value: str | int) -> int:
     if value == "<syear>":
         return 0
     else:
@@ -62,10 +62,8 @@ def main(
             )
         ),
     ],
-    syear: t.Annotated[int, typer.Option(default=..., help="start year")],
-    eyear: t.Annotated[
-        int, typer.Option(help="start year", parser=eyear_parser)
-    ] = "<syear>",  # type: ignore
+    syear: t.Annotated[int, typer.Option(help="start year")],
+    eyear: t.Annotated[int, typer.Option(help="end year", parser=end_year)] = "<syear>",  # type: ignore
     filename_prefix: t.Annotated[
         str, typer.Option(help="filename prefix")
     ] = "IMD_<name>",
