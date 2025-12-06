@@ -1,5 +1,6 @@
 import enum
 import typing as t
+from pathlib import Path
 
 import numpy as np
 import pandas as pd  # type: ignore
@@ -67,7 +68,7 @@ def main(
     filename_prefix: t.Annotated[
         str, typer.Option(help="filename prefix")
     ] = "IMD_<name>",
-    timeout: t.Annotated[int, typer.Option(help="timeout in seconds")] = 300,
+    timeout: t.Annotated[int, typer.Option(help="timeout in seconds")] = 3000,
 ):
     data_type = "bin"
     missing_value = np.nan
@@ -103,6 +104,10 @@ def main(
     if eyear == 0:
         eyear = syear
     for year in range(syear, eyear + 1):
+        outfile = f"{filename_prefix}_{year}.nc"
+        if Path(outfile).exists():
+            print(f"File already exists: {outfile}")  # noqa T201
+            continue
         data = {var: year}
         print(f"Downloading {name} data for {year}")  # noqa T201
         response = requests.post(url, data=data, proxies=None, timeout=timeout)
@@ -117,10 +122,10 @@ def main(
                 missing_value=missing_value,
                 units=units,
                 description=description,
-                filename=f"{filename_prefix}_{year}.nc",
+                filename=outfile,
             )
         elif data_type == "netcdf":
-            with open(f"{filename_prefix}_{year}.nc", "wb") as f:
+            with open(outfile, "wb") as f:
                 f.write(response.content)
 
 
