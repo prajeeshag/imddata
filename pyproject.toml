@@ -1,0 +1,73 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "imddata"
+dynamic = ["version"]
+description = "Download IMD Gridded Data"
+authors = [{ name = "Prajeesh Ag", email = "prajeeshag@gmail.com" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "netcdf4>=1.7.3",
+    "numpy>=2.3.5",
+    "pandas>=2.3.3",
+    "requests>=2.32.5",
+    "typer>=0.20.0",
+    "xarray>=2025.12.0",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+[project.urls]
+homepage = "https://github.com/prajeeshag/imddata"
+repository = "https://github.com/prajeeshag/imddata"
+documentation = "https://github.com/prajeeshag/imddata"
+
+[project.scripts]
+clios = "imddata:app"
+
+[tool.pdm.build]
+excludes = ["tests", "examples"]
+
+
+[tool.pdm.version]
+source = "scm"
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "examples"]
+
+[tool.commitizen]
+name = "cz_gitmoji"
+
+[dependency-groups]
+docs = []
+dev = [
+    "mypy>=1.13.0",
+    "pytest>=8.3.3",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
+    "pytest-sugar>=1.0.0",
+    "ruff>=0.8.0",
+]
+
+[tool.uv]
+default-groups = ["dev", "docs"]
+
+[tool.coverage.run]
+source = ["imddata"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+lint.extend-select = ["T201"]
