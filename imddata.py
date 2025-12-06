@@ -69,6 +69,7 @@ def main(
     filename_prefix: t.Annotated[
         str, typer.Option(help="filename prefix")
     ] = "IMD_<name>",
+    timeout: t.Annotated[int, typer.Option(help="timeout in seconds")] = 300,
 ):
     data_type = "bin"
     missing_value = np.nan
@@ -106,7 +107,7 @@ def main(
     for year in range(syear, eyear + 1):
         data = {var: year}
         print(f"Downloading {name} data for {year}")  # noqa T201
-        response = requests.post(url, data=data, proxies=None)
+        response = requests.post(url, data=data, proxies=None, timeout=timeout)
         response.raise_for_status()
         if data_type == "bin":
             nc_from_buffer(
