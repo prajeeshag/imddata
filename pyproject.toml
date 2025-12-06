@@ -32,7 +32,7 @@ repository = "https://github.com/prajeeshag/imddata"
 documentation = "https://github.com/prajeeshag/imddata"
 
 [project.scripts]
-clios = "imddata:app"
+imddata = "imddata:app"
 
 [tool.pdm.build]
 excludes = ["tests", "examples"]
