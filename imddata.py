@@ -16,6 +16,13 @@ class IMDData(enum.Enum):
     tmax = "tmax"
 
 
+IYEAR = {
+    "tmin": 1951,
+    "tmax": 1951,
+    "rain": 1901,
+}
+
+
 def lat_temp():
     lat = np.linspace(7.5, 37.5, 31)
     return xr.DataArray(
@@ -86,6 +93,10 @@ def main(
             missing_value = 99.9
         case _:
             raise ValueError(f"Invalid name: {name}")
+
+    if syear < IYEAR[name.value]:
+        syear = IYEAR[name.value]
+        print(f"Data not available before {syear}, starting from {syear}")  # noqa T201
 
     if filename_prefix == "IMD_<name>":
         filename_prefix = f"IMD_{name.value}"
