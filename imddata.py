@@ -4,11 +4,25 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd  # type: ignore
-import requests  # type: ignore
 import typer
 import xarray as xr
+from requests import Session
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 app = typer.Typer(add_completion=False)
+
+session = Session()
+retry = Retry(
+    total=5,  # retry up to 5 times
+    connect=5,  # retry on connection errors
+    read=5,  # retry on read timeout
+    backoff_factor=1,  # sleep: 1s, 2s, 4s, ...
+    allowed_methods=["GET", "POST"],
+)
+adapter = HTTPAdapter(max_retries=retry)
+session.mount("http://", adapter)
+session.mount("https://", adapter)
 
 
 class IMDData(enum.Enum):
@@ -24,8 +38,11 @@ IYEAR = {
 }
 
 
-def lat_temp():
-    lat = np.linspace(7.5, 37.5, 31)
+def lat(name: IMDData) -> xr.DataArray:
+    if name == IMDData.rain:
+        lat = np.linspace(6.5, 38.5, 129)
+    else:
+        lat = np.linspace(7.5, 37.5, 31)
     return xr.DataArray(
         lat,
         dims=("lat",),
@@ -34,8 +51,11 @@ def lat_temp():
     )
 
 
-def lon_temp():
-    lon = np.linspace(67.5, 97.5, 31)
+def lon(name: IMDData):
+    if name == IMDData.rain:
+        lon = np.linspace(66.5, 100.0, 135)
+    else:
+        lon = np.linspace(67.5, 97.5, 31)
     return xr.DataArray(
         lon,
         dims=("lon",),
@@ -68,17 +88,17 @@ def main(
     filename_prefix: t.Annotated[
         str, typer.Option(help="filename prefix")
     ] = "IMD_<name>",
-    timeout: t.Annotated[int, typer.Option(help="timeout in seconds")] = 3000,
 ):
     data_type = "bin"
     missing_value = np.nan
     match name:
         case IMDData.rain:
-            var = "RF25"
-            url = "https://imdpune.gov.in/cmpg/Griddata/RF25.php"
-            data_type = "netcdf"
+            var = "rain"
+            url = "https://imdpune.gov.in/cmpg/Griddata/rainfall.php"
+            # data_type = "netcdf"
             description = "IMD 0.25 degree gridded rainfall"
-            units = "mm"
+            units = "mm/day"
+            missing_value = -999.0
         case IMDData.tmax:
             var = "maxtemp"
             url = "https://imdpune.gov.in/cmpg/Griddata/maxtemp.php"
@@ -110,14 +130,15 @@ def main(
             continue
         data = {var: year}
         print(f"Downloading {name} data for {year}")  # noqa T201
-        response = requests.post(url, data=data, proxies=None, timeout=timeout)
+        response = session.post(url, data=data, proxies=None)
         response.raise_for_status()
+
         if data_type == "bin":
             nc_from_buffer(
                 response.content,
                 name.value,
-                lon_temp(),
-                lat_temp(),
+                lon(name),
+                lat(name),
                 days_of_year(year),
                 missing_value=missing_value,
                 units=units,
