@@ -17,8 +17,7 @@ For usage instructions, run
 $ imddata --help
 ```
 
-
-example:
+### example: download maximum temperature data
 ```bash
 $ imddata --name tmax --syear 2020 --eyear 2022
 $ ls
@@ -27,9 +26,27 @@ IMD_tmax_2021.nc
 IMD_tmax_2022.nc
 ```
 
-With a custom filename prefix:
+### example: download minimum temperature data
 ```bash
-$ imddata --name tmax --syear 2020 --eyear 2022 --filename-prefix tmin_data
+$ imddata --name tmin --syear 2020 --eyear 2022
+$ ls
+IMD_tmin_2020.nc
+IMD_tmin_2021.nc
+IMD_tmin_2022.nc
+```
+
+### example: download rainfall data
+```bash
+$ imddata --name rain --syear 2020 --eyear 2022
+$ ls
+IMD_rain_2020.nc
+IMD_rain_2021.nc
+IMD_rain_2022.nc
+```
+
+### Download with a custom filename prefix:
+```bash
+$ imddata --name tmin --syear 2020 --eyear 2022 --filename-prefix tmin_data
 $ ls
 tmin_data_2020.nc
 tmin_data_2021.nc
